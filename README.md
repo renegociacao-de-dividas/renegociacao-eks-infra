@@ -1,21 +1,71 @@
-# Renegociação de Dívidas — Plataforma Modular com Microsserviços
+# Infraestrutura EKS para Sistema de Renegociação de Dívidas
 
-## 🎯 Caso de Uso:
-Simular uma plataforma para renegociação de dívidas. Cada módulo é um microsserviço independente: cadastro, cálculo, proposta, aceite e acompanhamento.
+## Visão Geral
+Este repositório contém a infraestrutura como código (IaC) para provisionar e gerenciar um cluster Amazon EKS (Elastic Kubernetes Service) que suporta o sistema de renegociação de dívidas. A infraestrutura é gerenciada através do Terraform, permitindo uma implantação consistente e reproduzível do ambiente.
 
-### 🧰 Stack:
+## Objetivo do Projeto
+O objetivo principal deste repositório é fornecer uma infraestrutura robusta e escalável para hospedar aplicações relacionadas ao processo de renegociação de dívidas, garantindo alta disponibilidade, segurança e performance.
 
-- Java 17, Spring Boot 3 (REST APIs + validation)
-- Kafka (eventos entre serviços) 
-- PostgreSQL / DynamoDB
-- AWS ECS (ou Localstack), Terraform, Docker
-- Grafana + Prometheus ou DataDog (simulado) para observabilidade
-- Testes: JUnit + Testcontainers
+## Estrutura do Repositório
 
-### 🛠 Roteiro Técnico:
-- Estruturar 5 microsserviços REST com Spring Boot (um para cada domínio).
-- Comunicação via eventos Kafka (ex: proposta criada → aguardar aceite).
-- Persistência com PostgreSQL (ou simular NoSQL com DynamoDB).
-- Observabilidade: métricas básicas com actuator + Prometheus + Grafana.
-- Deploy local com Docker Compose (ou ECS com Terraform).
-- CI/CD simulado com GitHub Actions e testes automatizados.
+### Arquivos Principais
+- `eks.tf`: Configuração principal do cluster EKS
+- `vpc.tf`: Definição da rede virtual e subnets
+- `backend.tf`: Configuração do backend do Terraform (S3)
+- `data.tf`: Fontes de dados do Terraform
+- `variables.tf`: Definição de variáveis utilizadas na infraestrutura
+
+### Configurações Kubernetes
+- `ingress-controller.yaml`: Configuração do controlador de ingress
+- `irsa.yaml`: Configuração de IAM Roles for Service Accounts
+
+### CI/CD
+- `.github/workflows/`: Diretório contendo os workflows de GitHub Actions
+  - `tf_deploy.yaml`: Workflow para deploy da infraestrutura
+  - `tf_destroy.yaml`: Workflow para destruição da infraestrutura
+
+## Componentes da Infraestrutura
+
+### Cluster EKS
+- Cluster Kubernetes gerenciado pela AWS
+- Configurado com alta disponibilidade
+- Suporte a múltiplas zonas de disponibilidade
+
+### Nodes
+- Instâncias t3.large (SPOT)
+- Auto-scaling configurado (1-7 nós)
+- Disco de 20GB por nó
+
+### Rede
+- VPC dedicada
+- Subnets públicas e privadas
+- NAT Gateway para acesso à internet
+- Security Groups configurados
+
+### Segurança
+- IAM Roles e Policies
+- Provedor OIDC para autenticação
+- Políticas de segurança restritivas
+
+## Como Utilizar
+
+### Pré-requisitos
+1. Terraform instalado (versão 1.3.0 ou superior)
+2. Credenciais AWS configuradas
+3. Bucket S3 para estado do Terraform
+4. Acesso à AWS com permissões adequadas
+
+### Deploy
+1. Configure as variáveis de ambiente necessárias
+2. Execute o workflow de deploy via GitHub Actions
+3. Aguarde a conclusão do processo
+
+### Manutenção
+- Atualizações do cluster via Terraform
+- Monitoramento via CloudWatch
+- Backups automáticos do estado
+
+## Monitoramento e Logs
+- Métricas do CloudWatch
+- Logs do cluster
+- Monitoramento de recursos EC2
